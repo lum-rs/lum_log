@@ -1,0 +1,27 @@
+[package]
+name = "lum_log"
+version = "0.1.0"
+authors = ["Torben Schweren"]
+edition = "2021"
+rust-version = "1.82.0"
+description = "lum framework's logging library"
+readme = "README.md"
+repository = "https://github.com/lum-rs/lum_log"
+license = "MIT"
+keywords = ["lum", "framework", "logging", "log"]
+exclude = [".devcontainer", ".github", ".vscode"]
+
+[profile.release]
+debug = false
+opt-level = 3
+lto = true
+
+[profile.dev]
+debug = true
+opt-level = 0
+lto = false
+
+# serde is still needed for Serialize/Deserialize proc_macros
+[dependencies]
+lum_libs = "0.1.1"
+serde = { version = "1.0.215", features = ["derive"] }
