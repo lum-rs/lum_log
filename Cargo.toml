@@ -1,6 +1,6 @@
 [package]
 name = "lum_log"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Torben Schweren"]
 edition = "2021"
 rust-version = "1.82.0"
@@ -21,7 +21,8 @@ debug = true
 opt-level = 0
 lto = false
 
-# serde is still needed for Serialize/Deserialize proc_macros
+# serde has to be a dependency to use the Serialize and Deserialize derive macros.
+# We are still using the implementation from lum_libs, but the macro depends on the serde crate to be present.
 [dependencies]
 lum_libs = "0.1.1"
 serde = { version = "1.0.215", features = ["derive"] }
