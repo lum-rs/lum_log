@@ -26,17 +26,16 @@ pub fn is_set_up() -> bool {
 /// This uses [`fern`] under the hood.
 /// For a more intuitive way to set up the logger, see the [`Builder`](crate::Builder).
 /// This can only be called once.
-pub fn setup<OUTPUT, FORMAT>(
+pub fn setup<FernOutput: Into<fern::Output>, FormatFn>(
     colors: &HashMap<LevelFilter, String>,
     min_log_level: &LevelFilter,
     module_levels: &[(String, LevelFilter)],
-    chains: Vec<OUTPUT>,
-    format: FORMAT,
+    chains: Vec<FernOutput>,
+    format: FormatFn,
     is_debug_build: &bool,
 ) -> Result<(), SetLoggerError>
 where
-    OUTPUT: Into<fern::Output>,
-    FORMAT: Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static,
+    FormatFn: Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static,
 {
     let mut color_config: ColoredLevelConfig = ColoredLevelConfig::new();
     for (level, color) in colors.iter() {

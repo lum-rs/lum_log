@@ -9,7 +9,7 @@ use crate::{defaults, logger, Config};
 
 /// A `Builder` for configuring a logger and applying it as the global logger.
 ///
-/// # Example
+/// # Examples
 /// ```
 /// use std::{collections::HashMap, io};
 /// use lum_log::{Builder, Config, defaults};
@@ -45,29 +45,28 @@ use crate::{defaults, logger, Config};
 /// assert!(result.is_ok());
 /// ```
 #[derive(Debug)]
-pub struct Builder<'config, 'module_levels, OUTPUT, FORMAT>
+pub struct Builder<'config, 'module_levels, FernOutput: Into<fern::Output>, FormatFn>
 where
-    OUTPUT: Into<fern::Output>,
-    Vec<OUTPUT>: From<Vec<io::Stdout>>,
-    FORMAT: Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static,
+    Vec<FernOutput>: From<Vec<io::Stdout>>,
+    FormatFn: Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static,
 {
     config: Option<&'config Config>,
     module_levels: Option<&'module_levels [(String, LevelFilter)]>,
-    chains: Option<Vec<OUTPUT>>,
-    format: FORMAT,
+    chains: Option<Vec<FernOutput>>,
+    format: FormatFn,
     is_debug_build: bool,
 }
 
-impl<'config, 'module_levels, OUTPUT, FORMAT> Builder<'config, 'module_levels, OUTPUT, FORMAT>
+impl<'config, 'module_levels, FernOutput: Into<fern::Output>, FormatFn>
+    Builder<'config, 'module_levels, FernOutput, FormatFn>
 where
-    OUTPUT: Into<fern::Output>,
-    Vec<OUTPUT>: From<Vec<io::Stdout>>,
-    FORMAT: Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static,
+    Vec<FernOutput>: From<Vec<io::Stdout>>,
+    FormatFn: Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static,
 {
     /// Creates a new [`Builder`] with the given format.
     /// If you want to use the default format, use [`defaults::format()`](crate::defaults::format()).
     ///
-    /// # Example
+    /// # Examples
     /// ```
     /// use lum_log::{Builder, defaults};
     ///
@@ -75,7 +74,7 @@ where
     ///
     /// assert!(result.is_ok());
     /// ```
-    pub fn new(format: FORMAT) -> Self {
+    pub fn new(format: FormatFn) -> Self {
         Self {
             config: None,
             module_levels: None,
@@ -105,7 +104,7 @@ where
 
     /// Sets the chains for the logger.
     /// If you want to use the default chains, do not call this method.
-    pub fn chains(self, chains: Vec<OUTPUT>) -> Self {
+    pub fn chains(self, chains: Vec<FernOutput>) -> Self {
         Self {
             chains: Some(chains),
             ..self
@@ -113,7 +112,7 @@ where
     }
 
     /// Adds a chain to the logger.
-    pub fn chain(self, chain: OUTPUT) -> Self {
+    pub fn chain(self, chain: FernOutput) -> Self {
         let mut chains = self.chains.unwrap_or_default();
         chains.push(chain);
 
@@ -125,13 +124,13 @@ where
 
     /// Sets the format for the logger.
     /// This overrides the format set in [`Builder::new`](Self::new).
-    pub fn format(self, format: FORMAT) -> Self {
+    pub fn format(self, format: FormatFn) -> Self {
         Self { format, ..self }
     }
 
     /// Sets whether the logger is in debug build mode.
     ///
-    /// # Example
+    /// # Examples
     /// ```
     /// use lum_log::{Builder, defaults};
     ///

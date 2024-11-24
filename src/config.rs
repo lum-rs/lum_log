@@ -30,7 +30,7 @@ impl Default for Config {
     /// ### Minimum log level
     /// `Info`
     ///
-    /// # Example
+    /// # Examples
     /// ```
     /// use lum_log::Config;
     ///
