@@ -25,4 +25,4 @@ lto = false
 # We are still using the implementation from lum_libs, but the macro depends on the serde crate to be present.
 [dependencies]
 lum_libs = "0.1.5"
-serde = { version = "1.0.215", features = ["derive"] }
+serde = { version = "1.0.216", features = ["derive"] }
