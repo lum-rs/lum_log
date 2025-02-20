@@ -24,5 +24,5 @@ lto = false
 # serde has to be a dependency to use the Serialize and Deserialize derive macros.
 # We are still using the implementation from lum_libs, but the macro depends on the serde crate to be present.
 [dependencies]
-lum_libs = "0.1.5"
+lum_libs = "0.2.0"
 serde = { version = "1.0.218", features = ["derive"] }
