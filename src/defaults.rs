@@ -5,7 +5,7 @@ use std::{
 };
 
 use lum_libs::{
-    fern::{colors::ColoredLevelConfig, FormatCallback},
+    fern::{FormatCallback, colors::ColoredLevelConfig},
     humantime,
     log::Record,
 };
@@ -28,8 +28,8 @@ pub fn chains() -> Vec<io::Stdout> {
 /// ```text
 /// [2024-11-12T21:10:32Z example::module::path INFO ] This is a log message
 /// ```
-pub fn format(
-) -> impl Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static {
+pub fn format()
+-> impl Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static {
     move |out: FormatCallback, message: &Arguments, record: &Record, colors: &ColoredLevelConfig| {
         out.finish(format_args!(
             "[{} {: <30} {: <5}] {}",

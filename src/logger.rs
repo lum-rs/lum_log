@@ -7,9 +7,8 @@ use std::{
 
 use lum_libs::{
     fern::{
-        self,
+        self, FormatCallback,
         colors::{Color, ColoredLevelConfig},
-        FormatCallback,
     },
     log::{LevelFilter, Record, SetLoggerError},
 };

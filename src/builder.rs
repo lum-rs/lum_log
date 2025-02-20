@@ -1,11 +1,11 @@
 use std::{fmt::Arguments, io};
 
 use lum_libs::{
-    fern::{self, colors::ColoredLevelConfig, FormatCallback},
+    fern::{self, FormatCallback, colors::ColoredLevelConfig},
     log::{LevelFilter, Record, SetLoggerError},
 };
 
-use crate::{defaults, logger, Config};
+use crate::{Config, defaults, logger};
 
 /// A `Builder` for configuring a logger and applying it as the global logger.
 ///
