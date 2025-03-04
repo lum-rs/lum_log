@@ -1,6 +1,6 @@
 [package]
 name = "lum_log"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["Torben Schweren"]
 edition = "2024"
 rust-version = "1.85.0"
@@ -21,8 +21,5 @@ debug = true
 opt-level = 0
 lto = false
 
-# serde has to be a dependency to use the Serialize and Deserialize derive macros.
-# We are still using the implementation from lum_libs, but the macro depends on the serde crate to be present.
 [dependencies]
 lum_libs = "0.2.0"
-serde = { version = "1.0.218", features = ["derive"] }

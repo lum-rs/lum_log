@@ -9,6 +9,7 @@ use lum_libs::{
 /// This is used by the [`setup`](crate::setup) function and the [`Builder`](crate::Builder) to set up the logger.
 /// The idea is to implement `AsRef<Config>` for your own configuration type, and then use it to set up the logger.
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(crate = "lum_libs::serde")]
 pub struct Config {
     pub colors: HashMap<LevelFilter, String>,
     pub min_log_level: LevelFilter,
