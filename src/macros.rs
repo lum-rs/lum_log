@@ -4,7 +4,7 @@
 macro_rules! error {
     ($($arg:tt)*) => {
         if $crate::is_set_up() {
-            lum_libs::log::error!($($arg)*);
+            $crate::log::error!($($arg)*);
         } else {
             eprintln!($($arg)*);
         }
@@ -17,7 +17,7 @@ macro_rules! error {
 macro_rules! warn {
     ($($arg:tt)*) => {
         if $crate::is_set_up() {
-            lum_libs::log::warn!($($arg)*);
+            $crate::log::warn!($($arg)*);
         } else {
             println!($($arg)*);
         }
@@ -30,7 +30,7 @@ macro_rules! warn {
 macro_rules! info {
     ($($arg:tt)*) => {
         if $crate::is_set_up() {
-            lum_libs::log::info!($($arg)*);
+            $crate::log::info!($($arg)*);
         } else {
             println!($($arg)*);
         }
@@ -43,7 +43,7 @@ macro_rules! info {
 macro_rules! debug {
     ($($arg:tt)*) => {
         if $crate::is_set_up() {
-            lum_libs::log::debug!($($arg)*);
+            $crate::log::debug!($($arg)*);
         } else {
             println!($($arg)*);
         }
@@ -56,7 +56,7 @@ macro_rules! debug {
 macro_rules! trace {
     ($($arg:tt)*) => {
         if $crate::is_set_up() {
-            lum_libs::log::trace!($($arg)*);
+            $crate::log::trace!($($arg)*);
         } else {
             println!($($arg)*);
         }
