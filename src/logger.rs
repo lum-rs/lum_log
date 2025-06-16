@@ -1,7 +1,5 @@
 use std::{
-    collections::HashMap,
     fmt::Arguments,
-    str::FromStr,
     sync::atomic::{AtomicBool, Ordering},
 };
 
@@ -24,36 +22,32 @@ pub fn is_set_up() -> bool {
 /// Sets up the logger with the given configuration and applies it as the global logger.
 /// This uses [`fern`] under the hood.
 /// For a more intuitive way to set up the logger, see the [`Builder`](crate::Builder).
-/// This can only be called once.
-pub fn setup<FernOutput: Into<fern::Output>, FormatFn>(
-    colors: &HashMap<LevelFilter, String>,
+/// This can only be called once successfully.
+pub fn setup(
+    colors: &[(LevelFilter, Color)],
     min_log_level: &LevelFilter,
-    module_levels: &[(String, LevelFilter)],
-    chains: Vec<FernOutput>,
-    format: FormatFn,
+    module_levels: &[(impl AsRef<str>, LevelFilter)],
+    outputs: Vec<impl Into<fern::Output>>,
+    format: impl Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static,
     is_debug_build: &bool,
-) -> Result<(), SetLoggerError>
-where
-    FormatFn: Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static,
-{
+) -> Result<(), SetLoggerError> {
     let mut color_config: ColoredLevelConfig = ColoredLevelConfig::new();
     for (level, color) in colors.iter() {
-        let color = Color::from_str(color).unwrap_or(Color::White);
         match level {
             LevelFilter::Info => {
-                color_config = color_config.info(color);
+                color_config = color_config.info(*color);
             }
             LevelFilter::Error => {
-                color_config = color_config.error(color);
+                color_config = color_config.error(*color);
             }
             LevelFilter::Warn => {
-                color_config = color_config.warn(color);
+                color_config = color_config.warn(*color);
             }
             LevelFilter::Debug => {
-                color_config = color_config.debug(color);
+                color_config = color_config.debug(*color);
             }
             LevelFilter::Trace => {
-                color_config = color_config.trace(color);
+                color_config = color_config.trace(*color);
             }
             LevelFilter::Off => {}
         }
@@ -69,16 +63,18 @@ where
         .level(min_log_level)
         .format(move |out, message, record| format(out, message, record, &color_config));
 
-    for (module, level) in module_levels.iter() {
-        logger = logger.level_for(module.clone(), *level);
+    for (module, level) in module_levels {
+        let module = module.as_ref();
+        let module = module.to_string();
+        logger = logger.level_for(module, *level);
     }
 
-    for chain in chains {
-        logger = logger.chain(chain);
+    for output in outputs {
+        logger = logger.chain(output);
     }
 
     logger.apply()?;
-
     IS_LOGGER_SET_UP.store(true, Ordering::Relaxed);
+
     Ok(())
 }

@@ -1,26 +1,39 @@
 use std::{
+    collections::HashMap,
     fmt::Arguments,
     io::{self},
     time::SystemTime,
 };
 
 use lum_libs::{
-    fern::{FormatCallback, colors::ColoredLevelConfig},
+    fern::{
+        FormatCallback,
+        colors::{Color, ColoredLevelConfig},
+    },
     humantime,
-    log::Record,
+    log::{LevelFilter, Record},
 };
 
-use crate::Config;
+/// Returns the default colors HashMap
+pub fn colors() -> HashMap<LevelFilter, Color> {
+    let mut colors = HashMap::new();
+    colors.insert(LevelFilter::Error, Color::Red);
+    colors.insert(LevelFilter::Warn, Color::Yellow);
+    colors.insert(LevelFilter::Info, Color::Green);
+    colors.insert(LevelFilter::Debug, Color::Magenta);
+    colors.insert(LevelFilter::Trace, Color::Cyan);
 
-/// Returns a default `Config`.
-/// For more information, see [`Config::default`](crate::Config::default).
-pub fn config() -> Config {
-    Config::default()
+    colors
+}
+
+/// Returns the default minimum log level
+pub fn min_log_level() -> LevelFilter {
+    LevelFilter::Info
 }
 
 /// Returns a vector containing [`io::stdout()`](std::io::stdout).
 /// Into [`fern::Dispatch`](lum_libs::fern::Dispatch) is implemented for Vec<io::Stdout>, so this can be used as a chain.
-pub fn chains() -> Vec<io::Stdout> {
+pub fn outputs() -> Vec<io::Stdout> {
     vec![io::stdout()]
 }
 

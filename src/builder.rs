@@ -1,64 +1,54 @@
-use std::{fmt::Arguments, io};
+use std::{collections::HashMap, fmt::Arguments, io};
 
 use lum_libs::{
-    fern::{self, FormatCallback, colors::ColoredLevelConfig},
+    fern::{
+        self, FormatCallback,
+        colors::{Color, ColoredLevelConfig},
+    },
     log::{LevelFilter, Record, SetLoggerError},
 };
 
-use crate::{Config, defaults, logger};
+use crate::{defaults, logger};
 
 /// A `Builder` for configuring a logger and applying it as the global logger.
 ///
 /// # Examples
 /// ```
 /// use std::{collections::HashMap, io};
-/// use lum_log::{Builder, Config, defaults};
-/// use lum_libs::log::LevelFilter;
-///
-/// let mut colors = HashMap::new();
-/// colors.insert(LevelFilter::Info, "White".into());
-/// colors.insert(LevelFilter::Error, "Red".into());
-/// colors.insert(LevelFilter::Warn, "Yellow".into());
-/// colors.insert(LevelFilter::Debug, "Green".into());
-/// colors.insert(LevelFilter::Trace, "Blue".into());
-///
-/// let min_log_level = LevelFilter::Info;
-///
-/// let config = Config {
-///     colors,
-///     min_log_level,
-/// };
-///
-/// let module_levels = [
-///     ("some_lib".into(), LevelFilter::Debug),
-///     ("some_other_lib".into(), LevelFilter::Trace),
-///     ("some_other_lib::module".into(), LevelFilter::Warn),
-/// ];
+/// use lum_log::{Builder, defaults};
+/// use lum_libs::{log::LevelFilter, fern::colors::Color};
 ///
 /// let result = Builder::new(defaults::format())
-///     .config(&config)
-///     .chain(io::stdout())
+///     .color(LevelFilter::Error, Color::Red)
+///     .color(LevelFilter::Warn, Color::Yellow)
+///     .color(LevelFilter::Info, Color::Green)
+///     .color(LevelFilter::Debug, Color::Magenta)
+///     .color(LevelFilter::Trace, Color::Cyan)
+///     .min_log_level(LevelFilter::Info)
+///     .module_level("some_lib", LevelFilter::Debug)
+///     .module_level("some_other_lib", LevelFilter::Trace)
+///     .module_level("some_other_lib::module", LevelFilter::Warn)
+///     .output(io::stdout())
 ///     .is_debug_build(true)
-///     .module_levels(&module_levels)
 ///     .apply();
 ///
 /// assert!(result.is_ok());
 /// ```
 #[derive(Debug)]
-pub struct Builder<'config, 'module_levels, FernOutput: Into<fern::Output>, FormatFn>
+pub struct Builder<FernOutput: Into<fern::Output>, FormatFn>
 where
     Vec<FernOutput>: From<Vec<io::Stdout>>,
     FormatFn: Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static,
 {
-    config: Option<&'config Config>,
-    module_levels: Option<&'module_levels [(String, LevelFilter)]>,
-    chains: Option<Vec<FernOutput>>,
+    colors: Option<HashMap<LevelFilter, Color>>,
+    min_log_level: Option<LevelFilter>,
+    module_levels: HashMap<String, LevelFilter>,
+    outputs: Option<Vec<FernOutput>>,
     format: FormatFn,
     is_debug_build: bool,
 }
 
-impl<'config, 'module_levels, FernOutput: Into<fern::Output>, FormatFn>
-    Builder<'config, 'module_levels, FernOutput, FormatFn>
+impl<FernOutput: Into<fern::Output>, FormatFn> Builder<FernOutput, FormatFn>
 where
     Vec<FernOutput>: From<Vec<io::Stdout>>,
     FormatFn: Fn(FormatCallback, &Arguments, &Record, &ColoredLevelConfig) + Sync + Send + 'static,
@@ -76,48 +66,85 @@ where
     /// ```
     pub fn new(format: FormatFn) -> Self {
         Self {
-            config: None,
-            module_levels: None,
-            chains: None,
+            colors: None,
+            min_log_level: None,
+            module_levels: HashMap::new(),
+            outputs: None,
             format,
             is_debug_build: false,
         }
     }
 
-    /// Sets the configuration for the logger.
-    /// If you want to use the default configuration, do not call this method.
-    pub fn config(self, config: &'config Config) -> Self {
+    /// Sets the per-level colors.
+    /// If you want to use the default colors, do not call this method.
+    pub fn colors(self, colors: HashMap<LevelFilter, Color>) -> Self {
         Self {
-            config: Some(config),
+            colors: Some(colors),
+            ..self
+        }
+    }
+
+    /// Sets a color for a specific log level.
+    /// If you want to use the default colors, do not call this method.
+    pub fn color(self, level: LevelFilter, color: Color) -> Self {
+        let mut colors = self.colors.unwrap_or_default();
+        colors.insert(level, color);
+
+        Self {
+            colors: Some(colors),
+            ..self
+        }
+    }
+
+    /// Sets the minimum log level.
+    /// If you want to use the default minimum log level, do not call this method.
+    pub fn min_log_level(self, min_log_level: LevelFilter) -> Self {
+        Self {
+            min_log_level: Some(min_log_level),
             ..self
         }
     }
 
     /// Sets the module levels for the logger.
-    /// If you want to use the default module levels, do not call this method.
-    pub fn module_levels(self, module_levels: &'module_levels [(String, LevelFilter)]) -> Self {
+    /// By default, there are no module levels set.
+    pub fn module_levels(self, module_levels: HashMap<String, LevelFilter>) -> Self {
         Self {
-            module_levels: Some(module_levels),
+            module_levels,
+            ..self
+        }
+    }
+
+    /// Sets the module level for a specific module.
+    /// By default, there are no module levels set.
+    pub fn module_level(self, module: impl Into<String>, level: LevelFilter) -> Self {
+        let module = module.into();
+
+        let mut module_levels = self.module_levels;
+        module_levels.insert(module, level);
+
+        Self {
+            module_levels,
             ..self
         }
     }
 
     /// Sets the chains for the logger.
-    /// If you want to use the default chains, do not call this method.
-    pub fn chains(self, chains: Vec<FernOutput>) -> Self {
+    /// If you want to use the default outputs, do not call this method.
+    pub fn outputs(self, outputs: Vec<FernOutput>) -> Self {
         Self {
-            chains: Some(chains),
+            outputs: Some(outputs),
             ..self
         }
     }
 
     /// Adds a chain to the logger.
-    pub fn chain(self, chain: FernOutput) -> Self {
-        let mut chains = self.chains.unwrap_or_default();
-        chains.push(chain);
+    /// If you want to use the default outputs, do not call this method.
+    pub fn output(self, output: FernOutput) -> Self {
+        let mut outputs = self.outputs.unwrap_or_default();
+        outputs.push(output);
 
         Self {
-            chains: Some(chains),
+            outputs: Some(outputs),
             ..self
         }
     }
@@ -150,29 +177,34 @@ where
     /// Optional fields that were not set will use the default values from [`defaults`].
     /// This can only be called once.
     pub fn apply(self) -> Result<(), SetLoggerError> {
-        let config = match self.config {
-            Some(config) => config,
-            None => &defaults::config(),
+        let colors = match self.colors {
+            Some(colors) => colors,
+            None => defaults::colors(),
         };
 
-        let colors = &config.colors;
-        let min_log_level = &config.min_log_level;
+        let min_log_level = match self.min_log_level {
+            Some(min_log_level) => min_log_level,
+            None => defaults::min_log_level(),
+        };
 
-        let module_levels = self.module_levels.unwrap_or_default();
+        let module_levels = self.module_levels;
 
-        let chains = match self.chains {
-            Some(chains) => chains,
-            None => defaults::chains().into(),
+        let outputs = match self.outputs {
+            Some(outputs) => outputs,
+            None => defaults::outputs().into(),
         };
 
         let format = self.format;
         let is_debug_build = self.is_debug_build;
 
+        let colors = colors.into_iter().collect::<Vec<_>>();
+        let module_levels = module_levels.into_iter().collect::<Vec<_>>();
+
         logger::setup(
-            colors,
-            min_log_level,
-            module_levels,
-            chains,
+            &colors,
+            &min_log_level,
+            &module_levels,
+            outputs,
             format,
             &is_debug_build,
         )
