@@ -22,4 +22,4 @@ opt-level = 0
 lto = false
 
 [dependencies]
-lum_libs = { version = "0.2.5", features = ["fern", "humantime", "log"] }
+lum_libs = { version = "0.2.6", features = ["fern", "humantime", "log"] }
