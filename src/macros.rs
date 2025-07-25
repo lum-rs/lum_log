@@ -6,7 +6,7 @@ macro_rules! error {
         if $crate::is_set_up() {
             $crate::log::error!($($arg)*);
         } else {
-            eprintln!($($arg)*);
+            std::eprintln!($($arg)*);
         }
     };
 }
@@ -19,7 +19,7 @@ macro_rules! warn {
         if $crate::is_set_up() {
             $crate::log::warn!($($arg)*);
         } else {
-            println!($($arg)*);
+            std::println!($($arg)*);
         }
     };
 }
@@ -32,7 +32,7 @@ macro_rules! info {
         if $crate::is_set_up() {
             $crate::log::info!($($arg)*);
         } else {
-            println!($($arg)*);
+            std::println!($($arg)*);
         }
     };
 }
@@ -45,7 +45,7 @@ macro_rules! debug {
         if $crate::is_set_up() {
             $crate::log::debug!($($arg)*);
         } else {
-            println!($($arg)*);
+            std::println!($($arg)*);
         }
     };
 }
@@ -58,7 +58,25 @@ macro_rules! trace {
         if $crate::is_set_up() {
             $crate::log::trace!($($arg)*);
         } else {
-            println!($($arg)*);
+            std::println!($($arg)*);
         }
+    };
+}
+
+/// Calls the `error!` macro and then panics by using the `panic!` macro with the same message.
+#[macro_export]
+macro_rules! error_panic {
+    ($($arg:tt)*) => {
+        $crate::error!($($arg)*);
+        std::panic!($($arg)*);
+    };
+}
+
+/// Calls the `error!` macro and then panics by using the `unreachable!` macro with the same message.
+#[macro_export]
+macro_rules! error_unreachable {
+    ($($arg:tt)*) => {
+        $crate::error!($($arg)*);
+        std::unreachable!($($arg)*);
     };
 }
