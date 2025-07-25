@@ -157,7 +157,7 @@ dependencies = [
 
 [[package]]
 name = "lum_log"
-version = "0.2.6"
+version = "0.2.7"
 dependencies = [
  "lum_libs",
 ]
