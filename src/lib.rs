@@ -11,9 +11,9 @@ pub mod logger;
 /// Defines convenience logging macros.
 pub mod macros;
 
-/// Re-exports of external crates
+/// Re-exports of external crates.
 pub use lum_libs::log;
 
-// Re-exports of internal modules
+// Re-exports of internal modules.
 pub use config::ConfigBuilder;
 pub use logger::{is_set_up, setup};

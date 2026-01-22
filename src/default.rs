@@ -21,7 +21,7 @@ use lum_libs::{
     },
 };
 
-/// Returns the log level [`LevelFilter::Info`]
+/// Returns the log level [`LevelFilter::Info`].
 pub fn log_level() -> LevelFilter {
     LevelFilter::Info
 }
@@ -66,13 +66,14 @@ pub fn rolling_file_appender(path: impl AsRef<Path>) -> io::Result<RollingFileAp
                     FixedWindowRoller::builder()
                         .base(0)
                         .build("{}.log", 10)
-                        .unwrap(),
+                        .expect("Hard-coded example should always build successfully"),
                 ),
             )),
         )
 }
 
-/// Returns a tuple of the [`ConsoleAppender`] and [`RollingFileAppender`] returned by [`console_appender`] and [`rolling_file_appender`], respectively
+/// Returns a tuple of the [`ConsoleAppender`] and [`RollingFileAppender`]
+/// returned by [`console_appender`] and [`rolling_file_appender`], respectively.
 pub fn appenders(path: impl AsRef<Path>) -> (ConsoleAppender, io::Result<RollingFileAppender>) {
     let console_appender = console_appender();
     let rolling_file_appender = rolling_file_appender(path);

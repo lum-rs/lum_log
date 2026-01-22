@@ -13,12 +13,13 @@ use lum_libs::{
 use crate::default;
 
 /// A simplified builder for log4rs configurations.
+/// Note that this supports adding appenders to the root logger only.
 #[derive(Debug)]
 pub struct ConfigBuilder {
-    pub root_log_level: LevelFilter,
-    pub log_levels: HashMap<String, LevelFilter>,
-    pub appenders: HashMap<String, Box<dyn Append>>,
-    pub filters: HashMap<String, Vec<Box<dyn Filter>>>,
+    root_log_level: LevelFilter,
+    log_levels: HashMap<String, LevelFilter>,
+    appenders: HashMap<String, Box<dyn Append>>,
+    filters: HashMap<String, Vec<Box<dyn Filter>>>,
 }
 
 impl Default for ConfigBuilder {
@@ -46,31 +47,31 @@ impl ConfigBuilder {
     }
 
     /// Adds a log level for a specific logger name.
-    pub fn with_log_level(mut self, name: impl Into<String>, level: LevelFilter) -> Self {
+    pub fn log_level(mut self, name: impl Into<String>, level: LevelFilter) -> Self {
         self.log_levels.insert(name.into(), level);
         self
     }
 
     /// Adds an appender to the configuration.
-    pub fn with_appender(mut self, name: impl Into<String>, appender: Box<dyn Append>) -> Self {
+    pub fn appender(mut self, name: impl Into<String>, appender: Box<dyn Append>) -> Self {
         self.appenders.insert(name.into(), appender);
         self
     }
 
     /// Adds [`default::console_appender`] as "stdout".
-    pub fn with_stdout_console_appender(self) -> Self {
+    pub fn stdout_console_appender(self) -> Self {
         let console_appender = default::console_appender();
-        self.with_appender("stdout", Box::new(console_appender))
+        self.appender("stdout", Box::new(console_appender))
     }
 
     /// Adds [`default::rolling_file_appender`] as "file".
-    pub fn with_file_rolling_appender(self, path: impl AsRef<Path>) -> Result<Self, io::Error> {
+    pub fn file_rolling_appender(self, path: impl AsRef<Path>) -> Result<Self, io::Error> {
         let rolling_file_appender = default::rolling_file_appender(path)?;
-        Ok(self.with_appender("file", Box::new(rolling_file_appender)))
+        Ok(self.appender("file", Box::new(rolling_file_appender)))
     }
 
     /// Adds a filter to the configuration.
-    pub fn with_filter(mut self, name: impl Into<String>, filter: Box<dyn Filter>) -> Self {
+    pub fn filter(mut self, name: impl Into<String>, filter: Box<dyn Filter>) -> Self {
         self.filters.entry(name.into()).or_default().push(filter);
         self
     }
