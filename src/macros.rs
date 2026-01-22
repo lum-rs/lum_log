@@ -1,5 +1,6 @@
 /// Logs a message at the error level.
 /// If the logger is not set up, the message is printed to stderr.
+/// **This macro uses a Mutex under the hood, so do not use it in performance-critical code.**
 #[macro_export]
 macro_rules! error {
     ($($arg:tt)*) => {
@@ -13,6 +14,7 @@ macro_rules! error {
 
 /// Logs a message at the warn level.
 /// If the logger is not set up, the message is printed to stdout.
+/// **This macro uses a Mutex under the hood, so do not use it in performance-critical code.**
 #[macro_export]
 macro_rules! warn {
     ($($arg:tt)*) => {
@@ -26,6 +28,7 @@ macro_rules! warn {
 
 /// Logs a message at the info level.
 /// If the logger is not set up, the message is printed to stdout.
+/// **This macro uses a Mutex under the hood, so do not use it in performance-critical code.**
 #[macro_export]
 macro_rules! info {
     ($($arg:tt)*) => {
@@ -39,6 +42,7 @@ macro_rules! info {
 
 /// Logs a message at the debug level.
 /// If the logger is not set up, the message is printed to stdout.
+/// **This macro uses a Mutex under the hood, so do not use it in performance-critical code.**
 #[macro_export]
 macro_rules! debug {
     ($($arg:tt)*) => {
@@ -52,6 +56,7 @@ macro_rules! debug {
 
 /// Logs a message at the trace level.
 /// If the logger is not set up, the message is printed to stdout.
+/// **This macro uses a Mutex under the hood, so do not use it in performance-critical code.**
 #[macro_export]
 macro_rules! trace {
     ($($arg:tt)*) => {
@@ -64,6 +69,7 @@ macro_rules! trace {
 }
 
 /// Calls the `error!` macro and then panics by using the `panic!` macro with the same message.
+/// **This macro uses a Mutex under the hood, so do not use it in performance-critical code.**
 #[macro_export]
 macro_rules! error_panic {
     ($($arg:tt)*) => {
@@ -73,6 +79,7 @@ macro_rules! error_panic {
 }
 
 /// Calls the `error!` macro and then panics by using the `unreachable!` macro with the same message.
+/// **This macro uses a Mutex under the hood, so do not use it in performance-critical code.**
 #[macro_export]
 macro_rules! error_unreachable {
     ($($arg:tt)*) => {
