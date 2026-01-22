@@ -6,6 +6,7 @@ use lum_libs::{
         Config,
         append::Append,
         config::{Appender, Logger, Root, runtime::ConfigErrors},
+        filter::Filter,
     },
 };
 
@@ -17,15 +18,17 @@ pub struct ConfigBuilder {
     pub root_log_level: LevelFilter,
     pub log_levels: HashMap<String, LevelFilter>,
     pub appenders: HashMap<String, Box<dyn Append>>,
+    pub filters: HashMap<String, Vec<Box<dyn Filter>>>,
 }
 
 impl Default for ConfigBuilder {
-    /// Creates a default `ConfigBuilder`, using the root log level from [`default::log_level`], no log levels, and no appenders.
+    /// Creates a default `ConfigBuilder`, using the root log level from [`default::log_level`], no log levels, no appenders, and no filters.
     fn default() -> Self {
         Self {
             root_log_level: default::log_level(),
             log_levels: HashMap::new(),
             appenders: HashMap::new(),
+            filters: HashMap::new(),
         }
     }
 }
@@ -66,13 +69,29 @@ impl ConfigBuilder {
         Ok(self.with_appender("file", Box::new(rolling_file_appender)))
     }
 
-    /// Builds the [`Config`] from the provided settings.
-    pub fn build(self) -> Result<Config, ConfigErrors> {
-        let mut builder = Config::builder();
+    /// Adds a filter to the configuration.
+    pub fn with_filter(mut self, name: impl Into<String>, filter: Box<dyn Filter>) -> Self {
+        self.filters.entry(name.into()).or_default().push(filter);
+        self
+    }
 
+    /// Builds the [`Config`] from the provided settings.
+    pub fn build(mut self) -> Result<Config, ConfigErrors> {
         let appender_names = self.appenders.keys().cloned().collect::<Vec<String>>();
+
+        let mut builder = Config::builder();
         for (name, append) in self.appenders {
-            builder = builder.appender(Appender::builder().build(name.as_str(), append));
+            let filters = self.filters.remove(&name);
+
+            let mut appender = Appender::builder();
+            if let Some(filters) = filters {
+                for filter in filters {
+                    appender = appender.filter(filter);
+                }
+            }
+            let appender = appender.build(name.as_str(), append);
+
+            builder = builder.appender(appender);
         }
 
         for (name, level) in self.log_levels {
