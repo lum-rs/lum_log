@@ -23,4 +23,4 @@ lto = false
 
 [dependencies]
 lum_libs = { version = "0.2.10", features = ["humantime", "log", "log4rs", "parking_lot"] }
-thiserror = "2.0.17"
+thiserror = "2.0.18"
