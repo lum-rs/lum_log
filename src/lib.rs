@@ -16,5 +16,5 @@ pub use lum_libs::log;
 pub use lum_libs::log4rs;
 
 // Re-exports of internal modules.
-pub use builder::ConfigBuilder;
+pub use builder::{ConfigBuilder, ConfigBuilderError};
 pub use logger::{is_set_up, setup};
