@@ -77,7 +77,7 @@ impl ConfigBuilder {
 
     /// Builds the [`Config`] from the provided settings.
     pub fn build(mut self) -> Result<Config, ConfigErrors> {
-        let appender_names = self.appenders.keys().cloned().collect::<Vec<String>>();
+        let mut appender_names = Vec::with_capacity(self.appenders.len());
 
         let mut builder = Config::builder();
         for (name, append) in self.appenders {
@@ -92,6 +92,7 @@ impl ConfigBuilder {
             let appender = appender.build(name.as_str(), append);
 
             builder = builder.appender(appender);
+            appender_names.push(name);
         }
 
         for (name, level) in self.log_levels {
@@ -100,12 +101,7 @@ impl ConfigBuilder {
 
         let config = builder.build(
             Root::builder()
-                .appenders(
-                    appender_names
-                        .iter()
-                        .map(String::as_str)
-                        .collect::<Vec<&str>>(),
-                )
+                .appenders(appender_names)
                 .build(self.root_log_level),
         )?;
 
