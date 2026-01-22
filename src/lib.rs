@@ -3,7 +3,7 @@
 //! Furthermore, it provides logging macros that fall back to stdout/stderr if the logger is not set up yet.
 
 /// Defines the [`ConfigBuilder`] for building log4rs configurations.
-pub mod config;
+pub mod builder;
 /// Defines some defaults that help setting up logging.
 pub mod default;
 /// Defines functions to set up the logger.
@@ -13,7 +13,8 @@ pub mod macros;
 
 /// Re-exports of external crates.
 pub use lum_libs::log;
+pub use lum_libs::log4rs;
 
 // Re-exports of internal modules.
-pub use config::ConfigBuilder;
+pub use builder::ConfigBuilder;
 pub use logger::{is_set_up, setup};
