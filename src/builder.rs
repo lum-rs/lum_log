@@ -9,8 +9,20 @@ use lum_libs::{
         filter::Filter,
     },
 };
+use thiserror::Error;
 
 use crate::default;
+
+/// Errors that can occur when building a configuration.
+/// By wrapping possible errors in this type, a user does not need to handle multiple error types when building a configuration.
+#[derive(Debug, Error)]
+pub enum ConfigBuilderError {
+    #[error("I/O error while creating rolling file appender: {0}")]
+    FileRollingAppenderIo(#[from] io::Error),
+
+    #[error("Error while building log4rs configuration: {0}")]
+    Log4rs(#[from] ConfigErrors),
+}
 
 /// A simplified builder for log4rs configurations.
 /// Note that this supports adding appenders to the root logger only.
@@ -65,7 +77,7 @@ impl ConfigBuilder {
     }
 
     /// Adds [`default::rolling_file_appender`] as "file".
-    pub fn file_rolling_appender(self, path: impl AsRef<Path>) -> Result<Self, io::Error> {
+    pub fn file_rolling_appender(self, path: impl AsRef<Path>) -> Result<Self, ConfigBuilderError> {
         let rolling_file_appender = default::rolling_file_appender(path)?;
         Ok(self.appender("file", Box::new(rolling_file_appender)))
     }
@@ -77,7 +89,7 @@ impl ConfigBuilder {
     }
 
     /// Builds the [`Config`] from the provided settings.
-    pub fn build(mut self) -> Result<Config, ConfigErrors> {
+    pub fn build(mut self) -> Result<Config, ConfigBuilderError> {
         let mut appender_names = Vec::with_capacity(self.appenders.len());
 
         let mut builder = Config::builder();
