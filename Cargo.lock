@@ -322,7 +322,7 @@ dependencies = [
 
 [[package]]
 name = "lum_log"
-version = "0.3.2"
+version = "0.3.3"
 dependencies = [
  "lum_libs",
  "thiserror",
