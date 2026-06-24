@@ -1,4 +1,10 @@
-# lum_log
+# ARCHIVED
+
+Moved to https://github.com/lum-rs/lum
+
+---
+
+## lum_log
 
 lum framework's logging library
 
